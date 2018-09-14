@@ -68,14 +68,14 @@ class PythonDevConfigConan(ConanFile):
     @property
     def python_version(self):
         if not hasattr(self, '_py_version'):
-            cmd = "from sys import *; print('%d.%d' % (version_info[0],version_info[1]))"
+            cmd = "from sys import *; print('{0}.{1}'.format(version_info[0],version_info[1]))"
             self._py_version = self.run_python_command(cmd)
         return self._py_version
 
     @property
     def python_version_nodot(self):
         if not hasattr(self, '_py_version_nodot'):
-            cmd = "from sys import *; print('%d%d' % (version_info[0],version_info[1]))"
+            cmd = "from sys import *; print('{0}{1}'.format(version_info[0],version_info[1]))"
             self._py_version_nodot = self.run_python_command(cmd)
         return self._py_version_nodot
 
