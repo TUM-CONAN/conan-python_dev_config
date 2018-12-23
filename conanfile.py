@@ -17,7 +17,7 @@ class PythonDevConfigConan(ConanFile):
     license = "MIT"
     export = ["LICENSE.md"]
     description = "Configuration of Python interpreter for use as a development dependency."
-    url = "https://github.com/bincrafters/conan-python_dev_config"
+    url = "https://github.com/ulricheck/conan-python_dev_config"
     author = "Bincrafters <bincrafters@gmail.com>"
     options = { "python": "ANY" }
     default_options = "python=python"
