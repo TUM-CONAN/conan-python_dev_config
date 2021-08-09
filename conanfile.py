@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile
+from conans import ConanFile, tools
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -13,20 +13,40 @@ import re
 # pylint: disable=W0201
 class PythonDevConfigConan(ConanFile):
     name = "python_dev_config"
-    version = "0.5"
+    version = "0.6"
     license = "MIT"
-    export = ["LICENSE.md"]
+    exports = ["LICENSE.md"]
     description = "Configuration of Python interpreter for use as a development dependency."
     url = "https://github.com/ulricheck/conan-python_dev_config"
     author = "Bincrafters <bincrafters@gmail.com>"
-    options = { "python": "ANY" }
-    default_options = "python=python"
+
     settings = "os", "arch"
     build_policy = "missing"
 
+    options = { 
+        "python": "ANY",
+        "with_system_python": [True, False],
+    }
+
+    default_options = {
+        "with_system_python": True,
+        "python": "python.exe" if tools.os_info.is_windows else "python3",
+    }
+
+    def build_requirements(self):
+        if not self.options.with_system_python:
+            self.requires("python/3.8.11@camposs/stable")
+
+    def requirements(self):
+        if not self.options.with_system_python:
+            # self.requires("python/3.8.11@camposs/stable")
+            self.requires("python-setuptools/41.2.0@camposs/stable")
+            self.requires("python-pip/[>=19.2.3]@camposs/stable")
+            self.requires("cython/0.29.16@camposs/stable")
+            self.requires("python-numpy/1.18.4@camposs/stable")
+
     def package_id(self):
         self.info.header_only()
-        self.info.options.python_version = self.python_version
 
     def package_info(self):
         if self.have_python_dev:
@@ -34,12 +54,21 @@ class PythonDevConfigConan(ConanFile):
             self.cpp_info.libdirs = [os.path.dirname(self.python_lib)]
             self.cpp_info.libs = [self.python_lib_ldname]
             self.cpp_info.bindirs = [os.path.dirname(self.python_lib), os.path.dirname(self.python_exec)]
-            self.user_info.python_version = self.python_version
-            self.user_info.python_exec = self.python_exec
-            self.user_info.python_include_dir = self.python_include
-            self.user_info.python_lib_dir = os.path.dirname(self.python_lib)
-            self.env_info.path.append(os.path.dirname(self.python_lib))
-            self.env_info.path.append(os.path.dirname(self.python_exec))
+
+            if self.options.with_system_python:
+                self.user_info.PYTHON_VERSION = self.python_version
+                self.user_info.PYTHON = self.python_exec
+                majmin_ver = ".".join(self.version.split(".")[:2])
+                python_home = os.path.dirname(os.path.dirname(self.python_exec))
+                self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % majmin_ver))
+                self.env_info.PYTHONHOME = python_home
+                self.env_info.PATH.append(os.path.dirname(self.python_lib))
+                self.env_info.PATH.append(os.path.dirname(self.python_exec))
+                self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.python_lib))
+
+            self.user_info.PYTHON_EXEC = self.python_exec
+            self.user_info.PYTHON_INCLUDE_DIR = self.python_include
+            self.user_info.PYTHON_LIB_DIR = os.path.dirname(self.python_lib)
 
     @property
     def have_python_dev(self):
@@ -56,13 +85,18 @@ class PythonDevConfigConan(ConanFile):
     @property
     def python_exec(self):
         if not hasattr(self, '_py_exec'):
+            pyexec = str(self.options.python)
+            if not self.options.with_system_python:
+                pyexec = self.deps_env_info["python"].PYTHON
+
+            output = StringIO()
             try:
-                pyexec = str(self.options.python)
-                output = StringIO()
-                self.run('{0} -c "import sys; print(sys.executable)"'.format(pyexec), output=output)
+                self.run('{0} -c "import sys; print(sys.executable)"'.format(pyexec), output=output, run_environment=True)
                 self._py_exec = output.getvalue().strip()
             except:
-                raise Exception("Error running python at path provided: %s" % str(self.options.python))
+                self.output.error(output.getvalue())
+                raise Exception("Error running python at path provided: %s" % (str(self.options.python)))
+
         return self._py_exec
 
     @property
@@ -130,7 +164,7 @@ class PythonDevConfigConan(ConanFile):
         if pyexec:
             output = StringIO()
             self.output.info('running command: "{0}" -c "{1}"'.format(pyexec, cmd))
-            self.run('"{0}" -c "{1}"'.format(pyexec, cmd), output=output)
+            self.run('"{0}" -c "{1}"'.format(pyexec, cmd), output=output, run_environment=True)
             result = output.getvalue().strip()
         else:
             result = ""
