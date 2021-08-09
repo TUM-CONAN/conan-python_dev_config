@@ -21,7 +21,6 @@ class PythonDevConfigConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
 
     settings = "os", "arch"
-    build_policy = "missing"
 
     options = { 
         "python": "ANY",
