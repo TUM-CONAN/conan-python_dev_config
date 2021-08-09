@@ -45,30 +45,34 @@ class PythonDevConfigConan(ConanFile):
             self.requires("cython/0.29.16@camposs/stable")
             self.requires("python-numpy/1.18.4@camposs/stable")
 
+    def package(self):
+        self.copy("LICENSE.md", dst="doc")
+
     def package_id(self):
-        self.info.header_only()
+        del self.info.settings.arch
 
     def package_info(self):
-        if self.have_python_dev:
-            self.cpp_info.includedirs = [self.python_include]
-            self.cpp_info.libdirs = [os.path.dirname(self.python_lib)]
-            self.cpp_info.libs = [self.python_lib_ldname]
-            self.cpp_info.bindirs = [os.path.dirname(self.python_lib), os.path.dirname(self.python_exec)]
+        if not self.have_python_dev:
+            raise Exception("Python development environment not correctly setup.")
 
-            if self.options.with_system_python:
-                self.user_info.PYTHON_VERSION = self.python_version
-                self.user_info.PYTHON = self.python_exec
-                majmin_ver = ".".join(self.version.split(".")[:2])
-                python_home = os.path.dirname(os.path.dirname(self.python_exec))
-                self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % majmin_ver))
-                self.env_info.PYTHONHOME = python_home
-                self.env_info.PATH.append(os.path.dirname(self.python_lib))
-                self.env_info.PATH.append(os.path.dirname(self.python_exec))
-                self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.python_lib))
+        self.cpp_info.includedirs = [self.python_include]
+        self.cpp_info.libdirs = [os.path.dirname(self.python_lib)]
+        self.cpp_info.libs = [self.python_lib_ldname]
+        self.cpp_info.bindirs = [os.path.dirname(self.python_lib), os.path.dirname(self.python_exec)]
 
-            self.user_info.PYTHON_EXEC = self.python_exec
-            self.user_info.PYTHON_INCLUDE_DIR = self.python_include
-            self.user_info.PYTHON_LIB_DIR = os.path.dirname(self.python_lib)
+        self.user_info.PYTHON_VERSION = self.python_version
+        self.user_info.PYTHON = self.python_exec
+        majmin_ver = ".".join(self.version.split(".")[:2])
+        python_home = os.path.dirname(os.path.dirname(self.python_exec))
+        self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % majmin_ver))
+        self.env_info.PYTHONHOME = python_home
+        self.env_info.PATH.append(os.path.dirname(self.python_lib))
+        self.env_info.PATH.append(os.path.dirname(self.python_exec))
+        self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.python_lib))
+
+        self.user_info.PYTHON_EXEC = self.python_exec
+        self.user_info.PYTHON_INCLUDE_DIR = self.python_include
+        self.user_info.PYTHON_LIB_DIR = os.path.dirname(self.python_lib)
 
     @property
     def have_python_dev(self):
