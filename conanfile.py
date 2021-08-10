@@ -66,12 +66,13 @@ class PythonDevConfigConan(ConanFile):
         self.user_info.PYTHON_VERSION = self.python_version
         self.output.info("Set Env PYTHON: %s" % self.python_exec)
         self.user_info.PYTHON = self.python_exec
-        majmin_ver = ".".join(self.python_version.split(".")[:2])
-        python_home = os.path.dirname(os.path.dirname(self.python_exec))
-        self.output.info("Append Env PYTHONPATH: %s" % os.path.join(python_home, "lib", "python%s" % majmin_ver))
-        self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % majmin_ver))
-        self.output.info("Set Env PYTHONPATH: %s" % python_home)
-        self.env_info.PYTHONHOME = python_home
+
+        self.output.info("Append Env PYTHONPATH: %s" % self.python_stdlib)
+        self.env_info.PYTHONPATH.append(self.python_stdlib)
+        self.output.info("Set Env PYTHONHOME: %s" % self.python_prefix)
+        self.env_info.PYTHONHOME = self.python_prefix
+        
+
         self.output.info("Append Env PATH: %s" % os.path.dirname(self.python_lib))
         self.env_info.PATH.append(os.path.dirname(self.python_lib))
         self.output.info("Append Env PATH: %s" % os.path.dirname(self.python_exec))
@@ -147,6 +148,19 @@ class PythonDevConfigConan(ConanFile):
             else:
                 self._py_lib_ldname = re.sub(r'lib', '', os.path.splitext(os.path.basename(self.python_lib))[0])
         return self._py_lib_ldname
+
+
+    @property
+    def python_stdlib(self):
+        if not hasattr(self, '_py_stdlib'):
+            self._py_stdlib = self.get_python_path("stdlib")
+        return self._py_stdlib
+
+    @property
+    def python_prefix(self):
+        if not hasattr(self, '_py_prefix'):
+            self._py_prefix = self.get_python_var("prefix")
+        return self._py_prefix
 
     @property
     def python_bindir(self):
