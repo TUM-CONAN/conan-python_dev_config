@@ -54,19 +54,29 @@ class PythonDevConfigConan(ConanFile):
         if not self.have_python_dev:
             raise Exception("Python development environment not correctly setup.")
 
+        self.output.info("Set IncludeDir: %s" % self.python_include)
         self.cpp_info.includedirs = [self.python_include]
+        self.output.info("Set LibDir: %s" % self.python_lib)
         self.cpp_info.libdirs = [os.path.dirname(self.python_lib)]
+        self.output.info("Set Lib: %s" % self.python_lib)
         self.cpp_info.libs = [self.python_lib_ldname]
         self.cpp_info.bindirs = [os.path.dirname(self.python_lib), os.path.dirname(self.python_exec)]
 
+        self.output.info("Set Env PYTHON_VERSION: %s" % self.python_version)
         self.user_info.PYTHON_VERSION = self.python_version
+        self.output.info("Set Env PYTHON: %s" % self.python_exec)
         self.user_info.PYTHON = self.python_exec
-        majmin_ver = ".".join(self.version.split(".")[:2])
+        majmin_ver = ".".join(self.python_version.split(".")[:2])
         python_home = os.path.dirname(os.path.dirname(self.python_exec))
+        self.output.info("Append Env PYTHONPATH: %s" % os.path.join(python_home, "lib", "python%s" % majmin_ver))
         self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % majmin_ver))
+        self.output.info("Set Env PYTHONPATH: %s" % python_home)
         self.env_info.PYTHONHOME = python_home
+        self.output.info("Append Env PATH: %s" % os.path.dirname(self.python_lib))
         self.env_info.PATH.append(os.path.dirname(self.python_lib))
+        self.output.info("Append Env PATH: %s" % os.path.dirname(self.python_exec))
         self.env_info.PATH.append(os.path.dirname(self.python_exec))
+        self.output.info("Append Env LD_LIBRARY_PATH: %s" % os.path.dirname(self.python_lib))
         self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.python_lib))
 
         self.user_info.PYTHON_EXEC = self.python_exec
@@ -166,7 +176,7 @@ class PythonDevConfigConan(ConanFile):
         pyexec = self.python_exec
         if pyexec:
             output = StringIO()
-            self.output.info('running command: "{0}" -c "{1}"'.format(pyexec, cmd))
+            #self.output.info('running command: "{0}" -c "{1}"'.format(pyexec, cmd))
             self.run('"{0}" -c "{1}"'.format(pyexec, cmd), output=output, run_environment=True)
             result = output.getvalue().strip()
         else:
