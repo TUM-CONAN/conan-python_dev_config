@@ -47,8 +47,8 @@ class PythonDevConfigConan(ConanFile):
     def package(self):
         self.copy("LICENSE.md", dst="doc")
 
-    def package_id(self):
-        del self.info.settings.arch
+    # def package_id(self):
+    #     del self.info.settings.arch
 
     def package_info(self):
         if not self.have_python_dev:
