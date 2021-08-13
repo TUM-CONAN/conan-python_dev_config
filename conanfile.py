@@ -2,12 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from conans import ConanFile, tools
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 import os
-import re
 
 
 # pylint: disable=W0201
