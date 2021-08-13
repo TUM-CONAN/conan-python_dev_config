@@ -7,7 +7,7 @@ import os
 
 # pylint: disable=W0201
 class PythonDevConfigConan(ConanFile):
-    python_requires = "camp_common/0.1@camposs/stable"
+    python_requires = "camp_common/[>=0.1]@camposs/stable"
     python_requires_extend = "camp_common.CampPythonBase"
 
     name = "python_dev_config"
