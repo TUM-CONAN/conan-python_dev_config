@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.errors import ConanException
+from conan.tools.files import save, copy
 import os
-
 
 # pylint: disable=W0201
 class PythonDevConfigConan(ConanFile):
@@ -24,29 +25,31 @@ class PythonDevConfigConan(ConanFile):
     settings = "os", "arch"
 
     options = { 
-        "python": "ANY",
+        "python": ["ANY"],
         "with_system_python": [True, False],
     }
 
     default_options = {
         "with_system_python": True,
-        "python": "python.exe" if tools.os_info.is_windows else "python3",
+        "python": "python3",
     }
 
     def build_requirements(self):
         if not self.options.with_system_python:
-            self.requires("python/3.8.11@camposs/stable")
+            self.requires("cpython/3.10.0@camposs/stable")
 
     def requirements(self):
         if not self.options.with_system_python:
-            # self.requires("python/3.8.11@camposs/stable")
             self.requires("python-setuptools/41.2.0@camposs/stable")
             self.requires("python-pip/[>=19.2.3]@camposs/stable")
             self.requires("cython/0.29.16@camposs/stable")
             self.requires("python-numpy/1.18.4@camposs/stable")
 
+    def package_id(self):
+        self.info.clear()
+
     def package(self):
-        self.copy("LICENSE.md", dst="doc")
+        copy(self, "LICENSE.md", self.source_folder, self.package_folder)
 
 
     def package_info(self):
@@ -58,18 +61,18 @@ class PythonDevConfigConan(ConanFile):
         self.cpp_info.libs = [self._python_lib_ldname]
         self.cpp_info.bindirs = [os.path.dirname(self._python_lib), os.path.dirname(self._python_exec)]
 
-        self.user_info.PYTHON_VERSION = self._python_version
-        self.user_info.PYTHON = self._python_exec
         python_home = self._python_prefix
-        self.env_info.PYTHONPATH.append(os.path.join(python_home, "lib", "python%s" % self._python_version))
-        self.env_info.PYTHONHOME = python_home
-        self.env_info.PATH.append(os.path.dirname(self._python_lib))
-        self.env_info.PATH.append(os.path.dirname(self._python_exec))
-        self.env_info.LD_LIBRARY_PATH.append(os.path.join(self._python_lib))
+        self.buildenv_info.append_path("PYTHONPATH", os.path.join(python_home, "lib", "python%s" % self._python_version))
+        self.buildenv_info.define("PYTHONHOME", python_home)
+        self.buildenv_info.append_path("PATH", os.path.dirname(self._python_lib))
+        self.buildenv_info.append_path("PATH", os.path.dirname(self._python_exec))
+        self.buildenv_info.append_path("LD_LIBRARY_PATH", os.path.join(self._python_lib))
 
-        self.user_info.PYTHON_EXEC = self._python_exec
-        self.user_info.PYTHON_INCLUDE_DIR = self._python_include_dir
-        self.user_info.PYTHON_LIB_DIR = os.path.dirname(self._python_lib)
+        self.conf_info.define("tools.python_dev_config:python_version", self._python_version)
+        self.conf_info.define_path("tools.python_dev_config:python", self._python_exec)
+        self.conf_info.define_path("tools.python_dev_config:python_exec", self._python_exec)
+        self.conf_info.define_path("tools.python_dev_config:python_include_dir", self._python_include_dir)
+        self.conf_info.define_path("tools.python_dev_config:python_lib_dir", os.path.dirname(self._python_lib))
 
     @property
     def have_python_dev(self):
