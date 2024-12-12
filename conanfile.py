@@ -12,7 +12,7 @@ class PythonDevConfigConan(ConanFile):
     python_requires_extend = "camp_common.CampPythonBase"
 
     name = "python_dev_config"
-    upstream_version = '1.0'
+    upstream_version = '1.1'
     package_revision = ''
     version = "{0}{1}".format(upstream_version, package_revision)
 
@@ -26,24 +26,26 @@ class PythonDevConfigConan(ConanFile):
 
     options = { 
         "python": ["ANY"],
+        "python_version": ["ANY"],
         "with_system_python": [True, False],
     }
 
     default_options = {
-        "with_system_python": True,
         "python": "python3",
+        "python_version": "3.12",
+        "with_system_python": False,
     }
 
     def build_requirements(self):
         if not self.options.with_system_python:
-            self.requires("cpython/3.10.0@camposs/stable")
+            self.build_requires("cpython/[~{}]".format(self.options.python_version))
 
     def requirements(self):
         if not self.options.with_system_python:
-            self.requires("python-setuptools/41.2.0@camposs/stable")
-            self.requires("python-pip/[>=19.2.3]@camposs/stable")
-            self.requires("cython/0.29.16@camposs/stable")
-            self.requires("python-numpy/1.18.4@camposs/stable")
+            self.requires("python-pip/24.3.1@camposs/stable")
+            self.requires("python-setuptools/75.6.0@camposs/stable")
+            self.requires("cython/3.0.11-1@camposs/stable")
+            self.requires("python-numpy/2.2.0@camposs/stable")
 
     def package_id(self):
         self.info.clear()
