@@ -38,7 +38,7 @@ class PythonDevConfigConan(ConanFile):
 
     def requirements(self):
         if not self.options.with_system_python:
-            self.requires("cpython/[~{}]".format(self.options.python_version), run=True)
+            self.requires("cpython/[~{}]".format(self.options.python_version), run=True, transitive_headers=True, transitive_libs=True)
             self.requires("python-pip/24.3.1@camposs/stable", run=True)
             self.requires("python-setuptools/75.6.0@camposs/stable", run=True)
             self.requires("cython/3.0.11-1@camposs/stable", run=True)
