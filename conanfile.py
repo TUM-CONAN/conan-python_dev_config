@@ -24,21 +24,9 @@ class PythonDevConfigConan(ConanFile):
 
     settings = "os", "arch"
 
-    options = { 
-        "python": ["ANY"],
-        "python_version": ["ANY"],
-        "with_system_python": [True, False],
-    }
-
-    default_options = {
-        "python": "python3",
-        "python_version": "3.12",
-        "with_system_python": False,
-    }
-
     def requirements(self):
-        if not self.options.with_system_python:
-            self.requires("cpython/[~{}]".format(self.options.python_version), run=True, transitive_headers=True, transitive_libs=True)
+        if self._use_custom_python:
+            self.requires("cpython/[~{}]".format(self._python_version), run=True, transitive_headers=True, transitive_libs=True)
             self.requires("python-pip/24.3.1@camposs/stable", run=True)
             self.requires("python-setuptools/75.6.0@camposs/stable", run=True)
             self.requires("cython/3.0.11-1@camposs/stable", run=True)
@@ -55,7 +43,7 @@ class PythonDevConfigConan(ConanFile):
         if not self.have_python_dev:
             raise RuntimeError("Python development environment not correctly setup.")
 
-        if self.options.with_system_python:
+        if not self._use_custom_python:
             self.cpp_info.includedirs = [self._python_include_dir]
             self.cpp_info.libdirs = [os.path.dirname(self._python_lib)]
             self.cpp_info.libs = [self._python_lib_ldname]
