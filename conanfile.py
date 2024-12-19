@@ -34,6 +34,8 @@ class PythonDevConfigConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+        if self.conf.get("user.camp.common:use_custom_python", default=None, check_type=str):
+            self.info.conf.define("user.camp.common:use_custom_python", self.conf.get("user.camp.common:use_custom_python"))
 
     def package(self):
         copy(self, "LICENSE.md", self.source_folder, self.package_folder)
