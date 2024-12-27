@@ -30,7 +30,7 @@ class PythonDevConfigConan(ConanFile):
             self.requires("python-pip/24.3.1@camposs/stable", run=True)
             self.requires("python-setuptools/75.6.0@camposs/stable", run=True)
             self.requires("cython/3.0.11-1@camposs/stable", run=True)
-            self.requires("python-numpy/2.2.0@camposs/stable", run=True)
+            self.requires("python-numpy/1.26.4@camposs/stable", run=True)
 
     def package_id(self):
         self.info.clear()
