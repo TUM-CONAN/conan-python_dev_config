@@ -69,11 +69,11 @@ class PythonDevConfigConan(ConanFile):
 
 
 
-        self.conf_info.define("tools.python_dev_config:python_version", self._python_version)
-        self.conf_info.define_path("tools.python_dev_config:python", self._python_exec)
-        self.conf_info.define_path("tools.python_dev_config:python_exec", self._python_exec)
-        self.conf_info.define_path("tools.python_dev_config:python_include_dir", self._python_include_dir)
-        self.conf_info.define_path("tools.python_dev_config:python_lib_dir", os.path.dirname(self._python_lib))
+        self.conf_info.define("user.python_dev_config:python_version", self._python_version)
+        self.conf_info.define_path("user.python_dev_config:python", self._python_exec)
+        self.conf_info.define_path("user.python_dev_config:python_exec", self._python_exec)
+        self.conf_info.define_path("user.python_dev_config:python_include_dir", self._python_include_dir)
+        self.conf_info.define_path("user.python_dev_config:python_lib_dir", os.path.dirname(self._python_lib))
 
     @property
     def have_python_dev(self):
